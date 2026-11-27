@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<title>Super Amigos! Catálogo Digital</title>
+<style>
+:root{--k:#080808;--p:#A000F5;--y:#FFD600;--o:#F7F0E5;--g:#252525;--tx:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--k);color:#fff;font-family:"Trebuchet MS",system-ui,sans-serif;min-height:100vh}
+h1,h2,.lt{font-family:Impact,"Arial Black",sans-serif;letter-spacing:.5px}
+header{padding:14px 12px 8px;text-align:center;background:radial-gradient(circle at 80% 0,#A000F544,transparent 60%)}
+.logo{font-family:Impact,sans-serif;font-style:italic;font-size:34px;line-height:.9;color:var(--p);text-shadow:2px 2px 0 var(--y);transform:rotate(-3deg);display:inline-block;cursor:pointer}
+.seg{display:flex;max-width:320px;margin:10px auto 0;border:2px solid #444;border-radius:99px;overflow:hidden}
+.seg button{flex:1;border:0;padding:9px;font-weight:700;background:transparent;color:#fff;font-size:15px}
+.seg button.on{background:var(--y);color:#000}
+main{max-width:1100px;margin:0 auto;padding:10px 12px 40px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:700px){.grid.cats{grid-template-columns:repeat(4,1fr)}.grid.ph{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1000px){.grid.ph{grid-template-columns:repeat(4,1fr)}}
+.cat{aspect-ratio:1;border-radius:20px;position:relative;overflow:hidden;border:3px solid #000;box-shadow:0 0 0 2px #ffffff44;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;text-align:left;color:#000;font:inherit}
+.cat.c0{background:var(--y)}.cat.c1{background:var(--p);color:#fff}.cat.c2{background:var(--o)}.cat.c3{background:var(--g);color:var(--y)}
+.cat .face{position:absolute;inset:0 0 38% 0;display:flex;align-items:center;justify-content:center;font-size:64px}
+.cat .face img{width:100%;height:100%;object-fit:cover}
+.cat b{font-family:Impact,sans-serif;font-size:21px;font-style:italic;position:relative;text-transform:uppercase}
+.cat small{position:relative;opacity:.85}
+.cat .go{position:absolute;right:8px;bottom:8px;width:26px;height:26px;border-radius:50%;background:#000;color:#fff;display:grid;place-items:center}
+.cat .x{position:absolute;top:6px;right:6px;display:flex;gap:4px;z-index:2}
+.panel{background:var(--o);color:#111;border-radius:18px;padding:12px;margin-top:8px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0 12px}
+select,input[type=text],input[type=password]{padding:8px 10px;border-radius:10px;border:2px solid #000;background:#fff;color:#000;font:inherit;max-width:100%}
+.btn{background:var(--y);color:#000;border:2px solid #000;border-radius:12px;padding:8px 14px;font-weight:800;cursor:pointer;font:inherit;font-weight:800}
+.btn.p{background:var(--p);color:#fff}.btn.s{padding:4px 8px;font-size:12px}
+.ph .card{background:#fff;border-radius:14px;overflow:hidden;color:#111;position:relative;box-shadow:0 2px 6px #0006;cursor:pointer}
+.card img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#ddd}
+.card div.n{text-align:center;padding:7px 4px;font-weight:700;font-size:14px}
+.card.off img{filter:grayscale(1) opacity(.5)}
+.chk{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:7px;border:2px solid #000;background:#fff;display:grid;place-items:center;font-weight:900;color:#fff;z-index:2}
+.chk.on{background:var(--p)}
+.cnt{position:absolute;left:6px;top:6px;background:#000a;color:#fff;border-radius:8px;padding:1px 7px;font-size:12px}
+.crumb{display:flex;align-items:center;gap:8px;font-family:Impact,sans-serif;font-size:24px;margin:8px 0}
+.crumb button{background:none;border:0;color:var(--y);font-size:26px}
+.lb{position:fixed;inset:0;background:#000f;z-index:50;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.lb .top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-weight:800;font-size:18px}
+.lb .sl{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;min-height:0}
+.lb .sl div{flex:0 0 100%;scroll-snap-align:center;display:grid;place-items:center;padding:6px}
+.lb .sl img{max-width:100%;max-height:100%;object-fit:contain;border-radius:12px}
+.lb .nav{position:absolute;top:50%;width:100%;display:flex;justify-content:space-between;pointer-events:none;padding:0 8px}
+.lb .nav button{pointer-events:auto;width:38px;height:38px;border-radius:50%;border:0;background:#fffd;font-size:20px}
+.dots{text-align:center;padding:10px;color:var(--y)}
+.modal{position:fixed;inset:0;background:#000c;z-index:60;display:grid;place-items:center;padding:12px}
+.modal .box{background:var(--o);color:#111;border-radius:18px;padding:16px;width:100%;max-width:460px;max-height:92vh;overflow:auto;display:grid;gap:8px}
+.prev{display:flex;gap:6px;flex-wrap:wrap}.prev img{width:60px;height:60px;object-fit:cover;border-radius:8px}
+.empty{text-align:center;opacity:.7;padding:30px}
+</style></head><body>
+<header><span class="logo" onclick="go(null)">SUPER<br>AMIGOS!</span>
+<div class="seg"><button id="bc">👤 Cliente</button><button id="bf">🔒 Funcionário</button></div></header>
+<main id="app"><div class="empty">Carregando…</div></main>
+<div id="ov"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let sb,staff=false,cats=[],models=[],cat=null,F={sub:"",style:"",sort:"az",av:"all"},ready=false;
+const url=p=>sb.storage.from("fotos").getPublicUrl(p).data.publicUrl;
+const sortFns={az:(a,b)=>a.name.localeCompare(b.name,"pt"),za:(a,b)=>b.name.localeCompare(a.name,"pt"),new:(a,b)=>(b.created||0)-(a.created||0),old:(a,b)=>(a.created||0)-(b.created||0)};
+const fail=e=>alert("Erro: "+(e?.message||e));
+async function up(f){const ext=(f.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");const p=Date.now()+"-"+Math.random().toString(36).slice(2,8)+"."+ext;const {error}=await sb.storage.from("fotos").upload(p,f,{contentType:f.type,cacheControl:"31536000"});if(error)throw error;return p}
+async function load(){const [c,m]=await Promise.all([sb.from("cats").select("*"),sb.from("models").select("*")]);if(c.error||m.error)return fail(c.error||m.error);cats=c.data;models=m.data;ready=true;render()}
+function go(c){cat=c;F={sub:"",style:"",sort:"az",av:"all"};render()}
+function render(){
+ $("#bc").className=staff?"":"on";$("#bf").className=staff?"on":"";
+ const app=$("#app");
+ if(!ready){return}
+ if(!cat){
+  let h=`<h2 style="text-align:center;margin:6px 0 12px;color:var(--y)">Escolha uma categoria</h2><div class="grid cats">`;
+  cats.sort((a,b)=>(a.ord||0)-(b.ord||0)).forEach((c,i)=>{h+=`<div class="cat c${i%4}" onclick="go('${c.id}')"><div class="face">${c.img?`<img src="${url(c.img)}">`:c.emoji||"😎"}</div>${staff?`<div class="x" onclick="event.stopPropagation()"><button class="btn s" onclick="catForm('${c.id}')">✎</button></div>`:""}<b>${esc(c.name)}</b><small>${esc(c.sub||"")}</small><span class="go">›</span></div>`});
+  h+="</div>";
+  if(staff)h+=`<div class="bar" style="margin-top:14px"><button class="btn p" onclick="catForm()">+ Categoria</button><button class="btn" onclick="modelForm()">⬆ Importar fotos em lote</button></div>`;
+  if(!cats.length)h+=`<div class="empty">Nenhuma categoria ainda.${staff?"":" Volte em breve!"}</div>`;
+  app.innerHTML=h;return}
+ const c=cats.find(x=>x.id===cat);if(!c){cat=null;return render()}
+ let list=models.filter(m=>m.cat===cat&&(staff||m.avail));
+ const subs=[...new Set(list.map(m=>m.sub).filter(Boolean))],styles=[...new Set(list.map(m=>m.style).filter(Boolean))];
+ if(F.sub)list=list.filter(m=>m.sub===F.sub);if(F.style)list=list.filter(m=>m.style===F.style);
+ if(staff&&F.av!=="all")list=list.filter(m=>F.av==="on"?m.avail:!m.avail);
+ list.sort(sortFns[F.sort]);
+ const opt=(a,v,all)=>`<option value="">${all}</option>`+a.map(x=>`<option ${x===v?"selected":""}>${esc(x)}</option>`).join("");
+ let h=`<div class="crumb"><button onclick="go(null)">‹</button>${esc(c.name)}</div><div class="bar">
+ ${subs.length?`<select onchange="F.sub=this.value;render()">${opt(subs,F.sub,"Subcategoria")}</select>`:""}
+ ${styles.length?`<select onchange="F.style=this.value;render()">${opt(styles,F.style,"Modelo/estilo")}</select>`:""}
+ <select onchange="F.sort=this.value;render()">${[["az","A–Z"],["za","Z–A"],["new","Mais recentes"],["old","Mais antigos"]].map(([k,t])=>`<option value="${k}" ${F.sort===k?"selected":""}>Ordenar: ${t}</option>`).join("")}</select>
+ ${staff?`<select onchange="F.av=this.value;render()">${[["all","Todos"],["on","Disponíveis"],["off","Indisponíveis"]].map(([k,t])=>`<option value="${k}" ${F.av===k?"selected":""}>${t}</option>`).join("")}</select><button class="btn p" onclick="modelForm('${cat}')">+ Modelo / fotos</button>`:""}</div>
+ <div class="grid ph">`;
+ list.forEach(m=>{const p=m.photos||[];h+=`<div class="card ${m.avail?"":"off"}" onclick="open_('${m.id}')">${staff?`<div class="chk ${m.avail?"on":""}" onclick="event.stopPropagation();tog('${m.id}')">${m.avail?"✓":""}</div>`:""}${p.length>1?`<span class="cnt">${p.length}</span>`:""}${p[0]?`<img loading="lazy" src="${url(p[0])}">`:`<img>`}<div class="n">${esc(m.name)}</div></div>`});
+ h+="</div>";if(!list.length)h+=`<div class="empty">Nenhum modelo por aqui ainda.</div>`;
+ app.innerHTML=h}
+async function tog(id){const m=models.find(x=>x.id===id);const {error}=await sb.from("models").update({avail:!m.avail}).eq("id",id);if(error)return fail(error);m.avail=!m.avail;render()}
+function open_(id){const m=models.find(x=>x.id===id),p=m.photos||[];if(!p.length)return;
+ $("#ov").innerHTML=`<div class="lb"><div class="top"><div>${esc(m.name)}<div style="font-size:12px;font-weight:400;opacity:.7">${esc([m.sub,m.style].filter(Boolean).join(" • "))}</div></div><button class="btn s" onclick="$('#ov').innerHTML=''" style="font-size:18px">✕</button></div>
+ <div class="sl" id="sl">${p.map(x=>`<div><img src="${url(x)}"></div>`).join("")}</div>
+ <div class="nav"><button onclick="sl(-1)">‹</button><button onclick="sl(1)">›</button></div><div class="dots" id="dt">1 / ${p.length}</div>
+ ${staff?`<div class="bar" style="justify-content:center"><button class="btn s" onclick="modelForm(null,'${m.id}')">Editar / + fotos</button></div>`:""}</div>`;
+ const s=$("#sl");s.onscroll=()=>{$("#dt").textContent=(Math.round(s.scrollLeft/s.clientWidth)+1)+" / "+p.length}}
+function sl(d){const s=$("#sl");s.scrollBy({left:d*s.clientWidth,behavior:"smooth"})}
+function modal(inner){$("#ov").innerHTML=`<div class="modal"><div class="box">${inner}</div></div>`}
+function close_(){$("#ov").innerHTML=""}
+function catForm(id){const c=cats.find(x=>x.id===id)||{};
+ modal(`<h2>${id?"Editar":"Nova"} categoria</h2><input type=text id=cn placeholder="Nome" value="${esc(c.name||"")}"><input type=text id=cs placeholder="Legenda (ex: G1, G2 e G3)" value="${esc(c.sub||"")}"><input type=text id=ce placeholder="Emoji (se não houver desenho)" value="${esc(c.emoji||"")}"><label>Desenho do bonequinho: <input type=file id=cf accept="image/*"></label>
+ <div class="bar"><button class="btn p" id=sv>Salvar</button><button class="btn" onclick="close_()">Cancelar</button>${id?`<button class="btn" style="background:#f55" onclick="delCat('${id}')">Excluir</button>`:""}</div>`);
+ $("#sv").onclick=async()=>{try{$("#sv").textContent="Salvando…";let img=c.img||"";const f=$("#cf").files[0];if(f)img=await up(f);
+  const d={id:id||"c"+Date.now(),name:$("#cn").value.trim()||"Categoria",sub:$("#cs").value,emoji:$("#ce").value,img,ord:c.ord??Date.now()};
+  const {error}=await sb.from("cats").upsert(d);if(error)throw error;close_();load()}catch(e){fail(e);$("#sv").textContent="Salvar"}}}
+async function delCat(id){if(!confirm("Excluir categoria? Os modelos dela continuam salvos."))return;const {error}=await sb.from("cats").delete().eq("id",id);if(error)return fail(error);close_();load()}
+function modelForm(c,mid){const m=models.find(x=>x.id===mid),cc=m?m.cat:c||cat||"";
+ const co=cats.map(x=>`<option value="${x.id}" ${x.id===cc?"selected":""}>${esc(x.name)}</option>`).join("");
+ modal(`<h2>${m?"Editar modelo":"Importar fotos"}</h2>
+ <label>Categoria <select id=mc>${co}</select></label>
+ ${m?"":`<label>Modelo <select id=me><option value="">+ Novo modelo</option></select></label>`}
+ <input type=text id=mn placeholder="Nome do modelo (ex: Nirvana)" value="${esc(m?.name||"")}">
+ <input type=text id=ms placeholder="Subcategoria (ex: Rock)" value="${esc(m?.sub||"")}">
+ <input type=text id=my placeholder="Tipo/estilo (ex: Banda)" value="${esc(m?.style||"")}">
+ <label>Fotos (várias): <input type=file id=mf accept="image/*" multiple></label><div class="prev" id=pv></div>
+ <div class="bar"><button class="btn p" id=sv>Salvar tudo</button><button class="btn" onclick="close_()">Cancelar</button>${m?`<button class="btn" style="background:#f55" onclick="delM('${m.id}')">Excluir</button>`:""}</div>
+ ${m?`<div class="prev">${(m.photos||[]).map((p,i)=>`<span><img src="${url(p)}"><br><a href="#" onclick="rmP('${m.id}',${i});return false">remover</a></span>`).join("")}</div>`:""}`);
+ const fill=()=>{const me=$("#me");if(!me)return;me.innerHTML=`<option value="">+ Novo modelo</option>`+models.filter(x=>x.cat===$("#mc").value).map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("")};
+ fill();$("#mc").onchange=fill;
+ if($("#me"))$("#me").onchange=()=>{const x=models.find(k=>k.id===$("#me").value);if(x){$("#mn").value=x.name;$("#ms").value=x.sub||"";$("#my").value=x.style||""}};
+ $("#mf").onchange=()=>{$("#pv").innerHTML="";[...$("#mf").files].forEach(f=>{const i=new Image();i.src=URL.createObjectURL(f);$("#pv").appendChild(i)})};
+ $("#sv").onclick=async()=>{const name=$("#mn").value.trim();if(!name)return alert("Dê um nome ao modelo.");
+  try{$("#sv").disabled=true;const ids=[],fs=[...$("#mf").files];let n=0;for(const f of fs){$("#sv").textContent=`Enviando ${++n}/${fs.length}…`;ids.push(await up(f))}
+  const eid=m?.id||$("#me")?.value,ex=models.find(x=>x.id===eid);
+  const d={id:eid||"m"+Date.now(),name,cat:$("#mc").value,sub:$("#ms").value.trim(),style:$("#my").value.trim(),photos:[...(ex?.photos||[]),...ids],avail:ex?ex.avail:true,created:ex?.created||Date.now()};
+  const {error}=await sb.from("models").upsert(d);if(error)throw error;close_();load()}catch(e){fail(e);$("#sv").disabled=false;$("#sv").textContent="Salvar tudo"}}}
+async function rmP(mid,i){const m=models.find(x=>x.id===mid),p=[...m.photos],[gone]=p.splice(i,1);const {error}=await sb.from("models").update({photos:p}).eq("id",mid);if(error)return fail(error);m.photos=p;sb.storage.from("fotos").remove([gone]);modelForm(null,mid)}
+async function delM(id){if(!confirm("Excluir este modelo e suas fotos?"))return;const m=models.find(x=>x.id===id);const {error}=await sb.from("models").delete().eq("id",id);if(error)return fail(error);if(m?.photos?.length)sb.storage.from("fotos").remove(m.photos);close_();load()}
+function login(){
+ modal(`<h2>🔒 Acesso do funcionário</h2><input type=password id=pw placeholder="Senha-chave"><div class="bar"><button class="btn p" id=en>Entrar</button><button class="btn" onclick="close_()">Cancelar</button></div>`);
+ const go_=async()=>{const {error}=await sb.auth.signInWithPassword({email:CONFIG.STAFF_EMAIL,password:$("#pw").value});if(error)return alert("Senha incorreta.");staff=true;close_();await load()};
+ $("#en").onclick=go_;$("#pw").onkeydown=e=>{if(e.key==="Enter")go_()};$("#pw").focus()}
+$("#bc").onclick=()=>{staff=false;render()};
+$("#bf").onclick=async()=>{if(staff)return;const {data}=await sb.auth.getSession();if(data.session){staff=true;await load()}else login()};
+(async()=>{
+ if(!window.CONFIG||CONFIG.SUPABASE_URL.includes("COLE")){$("#app").innerHTML='<div class="empty">Configure o arquivo config.js (veja o README).</div>';return}
+ sb=supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY);
+ await load();
+})();
+</script></body></html>
